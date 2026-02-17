@@ -1,0 +1,10 @@
+.vs
+*.sln
+*vcxproj*
+*.cmake
+CMakeCache.txt
+CMakeFiles
+Debug
+x64
+x32
+x86
