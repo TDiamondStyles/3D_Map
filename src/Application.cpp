@@ -34,9 +34,9 @@ int main() {
     std::cout << "GLEW Version: " << glewGetString(GLEW_VERSION) << "\n";
 
     double latMin, latMax, lonMin, lonMax;
-    latMin = 55.7470;
+    latMin = 55.7490;
     latMax = 55.7545;
-    lonMin = 37.6140;
+    lonMin = 37.6160;
     lonMax = 37.6235;
 
     OSMDataFetcher dataFetcher(latMin, latMax, lonMin, lonMax, "http://overpass-api.de/api/interpreter");
