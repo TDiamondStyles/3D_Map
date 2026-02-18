@@ -7,6 +7,8 @@
 #include "OSMDataParser.h"
 #include "MeshManager.h"
 
+GLboolean glewExperimental = GL_TRUE;
+
 int main() {
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW\n";

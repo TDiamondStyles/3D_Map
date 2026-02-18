@@ -1,7 +1,8 @@
 #pragma once
 
 #include "MapDataTypes.h"
-#include "glm.hpp"
+
+#include <glm/glm.hpp>
 
 #include <vector>
 
