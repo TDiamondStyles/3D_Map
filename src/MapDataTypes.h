@@ -8,7 +8,7 @@ struct Node {
 };
 
 struct Way {
-	std::vector<size_t> nodeIndidcies;
+	std::vector<size_t> nodeIndecies;
 };
 
 struct MapData {

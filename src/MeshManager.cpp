@@ -10,9 +10,9 @@ void MeshManager::CreateMeshes(const MapData& mapData)
 		const auto& way = mapData.m_Ways[i];
 		auto& building = m_BuildingMeshes[i];
 
-		building.vertices.resize(way.nodeIndidcies.size() - 1); // last node index is the same as first so skip it
-		for (size_t j = 0; j < way.nodeIndidcies.size() - 1; j++) { 
-			const auto& node = mapData.m_Nodes[way.nodeIndidcies[j]];
+		building.vertices.resize(way.nodeIndecies.size() - 1); // last node index is the same as first so skip it
+		for (size_t j = 0; j < way.nodeIndecies.size() - 1; j++) {
+			const auto& node = mapData.m_Nodes[way.nodeIndecies[j]];
 			building.vertices[j] = CoordinateTransform(node.lat, node.lon);
 		}
 	}

@@ -1,23 +1,32 @@
-#include <iostream>
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include "OSMDataFetcher.h"
 #include "OSMDataParser.h"
 #include "MeshManager.h"
+#include "LogUtils.h"
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
+
+#include <iostream>
 
 GLboolean glewExperimental = GL_TRUE;
 
 int main() {
+
+#ifdef NDEBUG
+    spdlog::set_level(spdlog::level::info);
+#else
+    spdlog::set_level(spdlog::level::trace);
+#endif
+
     if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW\n";
+        spdlog::critical("Failed to initialize GLFW!");
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "3D Map", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1600, 1200, "3D Map", NULL, NULL);
     if (!window) {
-        std::cerr << "Failed to create GLFW window\n";
+        spdlog::critical("Failed to create GLFW window!");
         glfwTerminate();
         return -1;
     }
@@ -26,64 +35,68 @@ int main() {
 
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
-        std::cerr << "Failed to initialize GLEW\n";
+        spdlog::critical("Failed to initialize GLEW!");
         glfwTerminate();
         return -1;
     }
 
-    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
-    std::cout << "GLFW Version: " << glfwGetVersionString() << "\n";
-    std::cout << "GLEW Version: " << glewGetString(GLEW_VERSION) << "\n";
+    spdlog::debug("OpenGL Version: {}.", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+    spdlog::debug("GLFW Version: {}.", glfwGetVersionString());
+    spdlog::debug("GLEW Version : {}.", reinterpret_cast<const char*>(glewGetString(GLEW_VERSION)));
 
+    std::string overpassUrl = "http://overpass-api.de/api/interpreter";
     double latMin, latMax, lonMin, lonMax;
-    latMin = 55.7490;
-    latMax = 55.7545;
-    lonMin = 37.6160;
-    lonMax = 37.6235;
+    latMin = 54.8380;
+    latMax = 54.8490;
+    lonMin = 83.0880;
+    lonMax = 83.1020;
 
-    OSMDataFetcher dataFetcher(latMin, latMax, lonMin, lonMax, "http://overpass-api.de/api/interpreter");
+    spdlog::trace("Input min latitude: {:0.6f}.", latMin);
+    spdlog::trace("Input max latitude: {:0.6f}.", latMax);
+    spdlog::trace("Input min longitude: {:0.6f}.", lonMin);
+    spdlog::trace("Input max longitude: {:0.6f}.", lonMax);
+    spdlog::trace("Input overpass URL: {}.", overpassUrl);
 
-    std::cout << "Fetching data from overpass-api.de" << std::endl;
-
+    spdlog::info("Fetching data from {}.", overpassUrl);
+    OSMDataFetcher dataFetcher(latMin, latMax, lonMin, lonMax, overpassUrl);
     std::string jsonData = dataFetcher.FetchBuildings();
-    std::cout << jsonData << '\n';
+
+    spdlog::trace("JSON preview: {}...", jsonData.substr(0, 200));
 
     if (jsonData.find("ERROR") != std::string::npos) {
-        std::cin.get();
+        spdlog::error("Not valid response from the server!");
         return 0;
     }
 
+    if (jsonData.empty()) {
+        spdlog::error("JSON is empty!");
+        return 0;
+    }
+
+    spdlog::info("Parsing JSON contents.");
     auto mapData = ParseDataFromJson(jsonData);
 
-    std::cout << "Recieved " << mapData->m_Ways.size() << " buildings and " << mapData->m_Nodes.size() << " nodes." << std::endl;
-
+    spdlog::debug("Received buildings: {}, received nodes: {}.", mapData->m_Ways.size(), mapData->m_Nodes.size());
     for (size_t i = 0; i < mapData->m_Nodes.size(); i++) {
-        std::cout << std::setprecision(15) << i << " " << mapData->m_Nodes[i].lat << " " << mapData->m_Nodes[i].lon << "\n";
+        spdlog::trace("Node: id = {}, lat = {:.6f}, lon = {:.6f}", i, mapData->m_Nodes[i].lat, mapData->m_Nodes[i].lon);
+    }
+    for (size_t i = 0; i < mapData->m_Ways.size(); i++) {
+        spdlog::trace("Way: id = {}, node ind = {}", i, vectorToString(mapData->m_Ways[i].nodeIndecies));
     }
 
-    for (const auto& way : mapData->m_Ways) {
-        for (auto i : way.nodeIndidcies)
-            std::cout << i << ' ';
-        
-        std::cout << '\n';
-    }
-
+    spdlog::info("Creating mesh data.");
     MeshManager meshManager;
     meshManager.CreateMeshes(*mapData);
 
 
-    for (auto& building : meshManager.m_BuildingMeshes) {
-        for (auto& corner : building.vertices) {
-            std::cout << corner.x << ' ' << corner.y << ' ' << corner.z << '\n';
-        }
-
-        std::cout << '\n';
+    for (size_t i = 0; i < meshManager.m_BuildingMeshes.size(); i++) {
+        spdlog::trace("Building: id = {}, coordinates = [{}].", i, vectorToString(meshManager.m_BuildingMeshes[i].vertices));
     }
 
-
+    spdlog::info("Rendering the map.");
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-500, 500, -500, 500, -1, 1);
+    glOrtho(-900, 900, -1500, 1500, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 

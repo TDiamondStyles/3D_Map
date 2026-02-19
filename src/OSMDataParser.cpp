@@ -43,7 +43,7 @@ std::unique_ptr<MapData> ParseDataFromJson(std::string& jsonData)
             for (const auto& node : elem["nodes"])
             {
                 size_t id = osmIdToInternalId[node.get<uint64_t>()];
-                way.nodeIndidcies.emplace_back(id);
+                way.nodeIndecies.emplace_back(id);
             }
         }
     }

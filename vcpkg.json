@@ -5,6 +5,8 @@
     "glfw3",
     "glew",
     "glm",
-    "nlohmann-json"
+    "nlohmann-json",
+    "curl",
+    "spdlog"
   ]
 }

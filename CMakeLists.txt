@@ -14,27 +14,23 @@ add_executable(3D_Map
     src/MapDataTypes.h
     src/MeshManager.cpp
     src/MeshManager.h
+    src/LogUtils.h
 )
 
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 find_package(nlohmann_json REQUIRED)
-
-include(FetchContent)
-FetchContent_Declare(
-    cpp-httplib
-    GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
-    GIT_TAG v0.32.0
-)
-FetchContent_MakeAvailable(cpp-httplib)
+find_package(curl REQUIRED)
+find_package(spdlog REQUIRED)
 
 target_link_libraries(3D_Map PRIVATE
     glfw
     GLEW::GLEW
     glm::glm
     nlohmann_json::nlohmann_json
-    httplib::httplib
+    CURL::libcurl
+    spdlog::spdlog
     opengl32
 )
 

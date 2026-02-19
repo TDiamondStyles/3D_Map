@@ -1,6 +1,5 @@
 {
   "version": 3,
-  "defaultConfigurePreset": "windows-default",
   "configurePresets": [
     {
       "name": "windows-ninja",
